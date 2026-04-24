@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mbwira — Counselor Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Manrope:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --clay: #C35A4E; --forest: #2D3D2E; --forest-dark: #1C271D;
+    --cream: #F7F1E8; --cream-warm: #EFE5D2; --ink: #1A1A1A; --muted: #6B6258;
+    --urgent: #C33E3E; --ok: #4A7C59;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  .login-screen {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem;
+  }
+  .login-card {
+    background: #fff;
+    padding: 3rem 2.5rem;
+    border-radius: 8px;
+    max-width: 400px; width: 100%;
+    box-shadow: 0 20px 40px -20px rgba(0,0,0,0.15);
+  }
+  .login-card h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    margin-bottom: 0.4rem;
+  }
+  .login-card p { color: var(--muted); margin-bottom: 2rem; font-size: 0.9rem; }
+  .login-card input {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(45,61,46,0.2);
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    font-family: inherit;
+    font-size: 1rem;
+  }
+  .login-card button {
+    width: 100%;
+    padding: 0.95rem;
+    background: var(--forest);
+    color: var(--cream);
+    border: none;
+    border-radius: 4px;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* --- main layout --- */
+  .main { display: none; }
+  .main.visible { display: block; }
+  .topbar {
+    background: var(--forest-dark);
+    color: var(--cream);
+    padding: 1rem 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .topbar .brand {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+  }
+  .topbar .brand span { color: var(--clay); }
+  .content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: #fff;
+    border: 1px solid rgba(45,61,46,0.1);
+    border-radius: 6px;
+    padding: 1.2rem;
+  }
+  .stat-card .label {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .stat-card .value {
+    font-family: 'Fraunces', serif;
+    font-size: 2.2rem;
+    font-weight: 500;
+    margin-top: 0.3rem;
+  }
+  .stat-card.urgent .value { color: var(--urgent); }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    margin: 2rem 0 1rem;
+    font-weight: 500;
+  }
+  .escalation-table {
+    width: 100%;
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(45,61,46,0.1);
+  }
+  .escalation-row {
+    display: grid;
+    grid-template-columns: 120px 140px 100px 1fr 120px;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(45,61,46,0.08);
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .escalation-row:hover { background: var(--cream-warm); }
+  .escalation-row.header {
+    background: var(--cream-warm);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    cursor: default;
+  }
+  .escalation-row.header:hover { background: var(--cream-warm); }
+  .pill {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  .pill.urgent { background: var(--urgent); color: white; }
+  .pill.warn { background: var(--clay); color: white; }
+  .pill.info { background: var(--forest); color: var(--cream); }
+  .channel-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.5rem;
+    background: var(--cream-warm);
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  /* --- modal --- */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(28,39,29,0.5);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 1rem;
+  }
+  .modal-backdrop.visible { display: flex; }
+  .modal {
+    background: var(--cream);
+    border-radius: 8px;
+    max-width: 700px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  .modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(45,61,46,0.1);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-header h3 { font-family: 'Fraunces', serif; font-size: 1.3rem; }
+  .modal-header button {
+    background: transparent; border: none; font-size: 1.5rem;
+    cursor: pointer; color: var(--muted);
+  }
+  .modal-body { padding: 2rem; }
+  .msg-bubble {
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+  .msg-bubble.user { background: var(--forest); color: var(--cream); margin-left: 3rem; }
+  .msg-bubble.assistant { background: #fff; border: 1px solid rgba(45,61,46,0.1); margin-right: 3rem; }
+  .msg-bubble.flagged { border-left: 4px solid var(--urgent); }
+  .msg-meta { font-size: 0.7rem; color: var(--muted); margin-top: 0.2rem; }
+  .resolve-section {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid rgba(45,61,46,0.1);
+  }
+  .resolve-section textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid rgba(45,61,46,0.2);
+    border-radius: 4px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 70px;
+    margin-bottom: 1rem;
+  }
+  .resolve-section button {
+    padding: 0.7rem 1.5rem;
+    background: var(--ok);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+  }
+  .empty {
+    padding: 3rem;
+    text-align: center;
+    color: var(--muted);
+    background: #fff;
+    border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <h1>Counselor Dashboard</h1>
+    <p>Enter your dashboard password to view pending escalations.</p>
+    <input type="password" id="pwd" placeholder="Password" autocomplete="off" />
+    <button id="loginBtn">Enter</button>
+  </div>
+</div>
+
+<div class="main" id="main">
+  <div class="topbar">
+    <div class="brand">mb<span>wira</span> · counselor</div>
+    <div style="font-size:0.85rem;opacity:0.7" id="tsNow"></div>
+  </div>
+  <div class="content">
+    <div class="stats" id="stats"></div>
+    <h2>Pending escalations</h2>
+    <div id="escalationList"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Session details</h3>
+      <button id="closeModal">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="callback-section" id="callbackSection" style="
+      padding: 1.5rem 2rem;
+      border-top: 1px solid rgba(45,61,46,0.1);
+      background: rgba(195,90,78,0.05);
+    ">
+      <h4 style="font-family: 'Fraunces', serif; font-size: 1.1rem; margin-bottom: 0.8rem;">
+        Reach the user
+      </h4>
+      <div id="contactInfo" style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted);">
+        Loading contact options...
+      </div>
+      <div id="revealedNumber" style="
+        display: none;
+        padding: 0.8rem 1rem;
+        background: var(--forest);
+        color: var(--cream);
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.05rem;
+      "></div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button id="revealBtn" style="
+          padding: 0.6rem 1rem; background: var(--clay); color: white;
+          border: none; border-radius: 4px; cursor: pointer; font-family: inherit;
+          font-size: 0.9rem;
+        ">📞 Reveal number to call</button>
+        <button id="sendWhatsappBtn" style="
+          padding: 0.6rem 1rem; background: #25D366; color: white;
+          border: none; border-radius: 4px; cursor: pointer; font-family: inherit;
+          font-size: 0.9rem;
+        ">💬 Send WhatsApp reply</button>
+      </div>
+      <div id="outboundArea" style="display: none; margin-top: 1rem;">
+        <textarea id="outboundText" placeholder="Type a message to send the user on WhatsApp..." style="
+          width: 100%; padding: 0.8rem; border: 1px solid rgba(45,61,46,0.2);
+          border-radius: 4px; font-family: inherit; min-height: 80px; resize: vertical;
+          margin-bottom: 0.5rem;
+        "></textarea>
+        <button id="outboundSendBtn" style="
+          padding: 0.6rem 1rem; background: #25D366; color: white;
+          border: none; border-radius: 4px; cursor: pointer; font-family: inherit;
+          font-size: 0.9rem; font-weight: 600;
+        ">Send</button>
+      </div>
+    </div>
+    <div class="resolve-section">
+      <textarea id="resolveNotes" placeholder="Resolution notes (what did you do / how did you reach the user)..."></textarea>
+      <button id="resolveBtn">Mark resolved</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let password = "";
+let currentEscalationId = null;
+
+function reasonPill(reason) {
+  const urgent = ["suicidal_ideation", "medical_emergency", "gbv", "child_safeguarding"];
+  const cls = urgent.includes(reason) ? "urgent" : "info";
+  return `<span class="pill ${cls}">${reason}</span>`;
+}
+
+async function apiGet(path) {
+  const res = await fetch(path, { headers: { "X-Dashboard-Password": password } });
+  if (res.status === 401) { alert("Wrong password"); throw new Error("auth"); }
+  return res.json();
+}
+
+async function loadDashboard() {
+  try {
+    const [stats, escalations] = await Promise.all([
+      apiGet("/counselor/stats"),
+      apiGet("/counselor/escalations?status=pending"),
+    ]);
+    renderStats(stats);
+    renderEscalations(escalations);
+    document.getElementById("tsNow").textContent = new Date().toLocaleString();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function renderStats(s) {
+  const el = document.getElementById("stats");
+  el.innerHTML = `
+    <div class="stat-card urgent">
+      <div class="label">Pending escalations</div>
+      <div class="value">${s.escalations_pending}</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Total sessions</div>
+      <div class="value">${s.sessions_total}</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Total escalations</div>
+      <div class="value">${s.escalations_total}</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">By channel</div>
+      <div class="value" style="font-size:1rem;font-family:inherit">
+        ${Object.entries(s.sessions_by_channel).map(([k,v]) => `${k}: ${v}`).join(" · ") || "—"}
+      </div>
+    </div>
+  `;
+}
+
+function formatAge(mins) {
+  if (mins < 60) return `${mins}m ago`;
+  if (mins < 60 * 24) return `${Math.floor(mins/60)}h ${mins%60}m`;
+  return `${Math.floor(mins/60/24)}d ${Math.floor(mins/60)%24}h`;
+}
+function slaBadge(mins, reason) {
+  // Target SLA: urgent reasons = 1h, others = 24h
+  const urgent = ["suicidal_ideation", "medical_emergency", "gbv", "child_safeguarding"];
+  const target = urgent.includes(reason) ? 60 : 24 * 60;
+  const pct = mins / target;
+  const color = pct > 1 ? "var(--urgent)" : pct > 0.5 ? "var(--clay)" : "var(--ok)";
+  return `<span style="color:${color};font-weight:600">${formatAge(mins)}</span>`;
+}
+
+function renderEscalations(list) {
+  const el = document.getElementById("escalationList");
+  if (!list.length) {
+    el.innerHTML = `<div class="empty">No pending escalations. Good news.</div>`;
+    return;
+  }
+  el.innerHTML = `
+    <div class="escalation-table">
+      <div class="escalation-row header">
+        <div>Age</div>
+        <div>Reason</div>
+        <div>Channel</div>
+        <div>Notes</div>
+        <div>Reachable?</div>
+      </div>
+      ${list.map(e => `
+        <div class="escalation-row" data-id="${e.id}">
+          <div>${slaBadge(e.age_minutes, e.reason)}</div>
+          <div>${reasonPill(e.reason)}</div>
+          <div><span class="channel-pill">${e.channel}</span></div>
+          <div style="font-size:0.85rem;color:var(--muted)">
+            ${(e.notes || "").slice(0, 100)}${(e.notes||"").length>100?"…":""}
+          </div>
+          <div>${e.contact_available ? "📞 yes" : "—"}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+  el.querySelectorAll(".escalation-row[data-id]").forEach(row => {
+    row.onclick = () => openModal(parseInt(row.dataset.id));
+  });
+}
+
+let currentEscalationData = null;
+
+async function openModal(id) {
+  currentEscalationId = id;
+  const messages = await apiGet(`/counselor/escalations/${id}/messages`);
+  const body = document.getElementById("modalBody");
+  body.innerHTML = messages.map(m => `
+    <div class="msg-bubble ${m.role} ${m.flagged ? "flagged" : ""}">
+      ${m.content.replace(/</g, "&lt;")}
+      <div class="msg-meta">${m.role} · ${new Date(m.created_at).toLocaleString()}
+      ${m.flag_reason ? "· ⚠ " + m.flag_reason : ""}</div>
+    </div>
+  `).join("");
+
+  // Find this escalation's metadata from the loaded list
+  const list = await apiGet("/counselor/escalations?status=pending");
+  const fromPending = list.find(e => e.id === id);
+  if (!fromPending) {
+    const takenList = await apiGet("/counselor/escalations?status=taken");
+    currentEscalationData = takenList.find(e => e.id === id) || { channel: "?", contact_available: false };
+  } else {
+    currentEscalationData = fromPending;
+  }
+
+  // Reset the callback panel
+  document.getElementById("revealedNumber").style.display = "none";
+  document.getElementById("outboundArea").style.display = "none";
+  document.getElementById("outboundText").value = "";
+  const info = document.getElementById("contactInfo");
+  const sendBtn = document.getElementById("sendWhatsappBtn");
+  const revealBtn = document.getElementById("revealBtn");
+
+  if (!currentEscalationData.contact_available) {
+    info.innerHTML = `<strong>⚠ No contact number on file.</strong> This user cannot be called back directly. Consider posting a reply through the channel they used, or waiting for them to return.`;
+    revealBtn.disabled = true;
+    sendBtn.disabled = true;
+    revealBtn.style.opacity = "0.4";
+    sendBtn.style.opacity = "0.4";
+  } else {
+    info.innerHTML = `Channel: <strong>${currentEscalationData.channel}</strong>. Reveal the number to call directly, or send a WhatsApp reply (WhatsApp sessions only).`;
+    revealBtn.disabled = false;
+    sendBtn.disabled = (currentEscalationData.channel !== "whatsapp");
+    revealBtn.style.opacity = "1";
+    sendBtn.style.opacity = (currentEscalationData.channel !== "whatsapp") ? "0.4" : "1";
+  }
+
+  document.getElementById("modalBackdrop").classList.add("visible");
+}
+
+document.getElementById("revealBtn").onclick = async () => {
+  const reason = prompt("Why are you revealing this number? (logged in audit trail)",
+    "Calling user regarding pending escalation");
+  if (!reason) return;
+  const res = await fetch(`/counselor/escalations/${currentEscalationId}/reveal-contact`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Dashboard-Password": password },
+    body: JSON.stringify({ reason }),
+  });
+  if (!res.ok) { alert("Failed to reveal number."); return; }
+  const data = await res.json();
+  const el = document.getElementById("revealedNumber");
+  el.style.display = "block";
+  el.innerHTML = `📞 <a href="tel:${data.contact_number}" style="color:var(--cream);text-decoration:underline">${data.contact_number}</a>
+    <span style="font-size:0.75rem;opacity:0.7;margin-left:0.5rem">(${data.channel})</span>`;
+};
+
+document.getElementById("sendWhatsappBtn").onclick = () => {
+  document.getElementById("outboundArea").style.display = "block";
+  document.getElementById("outboundText").focus();
+};
+
+document.getElementById("outboundSendBtn").onclick = async () => {
+  const text = document.getElementById("outboundText").value.trim();
+  if (!text) return;
+  const res = await fetch(`/counselor/escalations/${currentEscalationId}/send-message`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Dashboard-Password": password },
+    body: JSON.stringify({ text }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    alert("Failed to send: " + (err.detail || res.statusText));
+    return;
+  }
+  alert("Sent. The user will receive it on WhatsApp shortly.");
+  document.getElementById("outboundText").value = "";
+  document.getElementById("outboundArea").style.display = "none";
+  await openModal(currentEscalationId);  // refresh transcript
+};
+
+document.getElementById("closeModal").onclick = () => {
+  document.getElementById("modalBackdrop").classList.remove("visible");
+};
+
+document.getElementById("resolveBtn").onclick = async () => {
+  const notes = document.getElementById("resolveNotes").value;
+  await fetch(`/counselor/escalations/${currentEscalationId}/resolve`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Dashboard-Password": password },
+    body: JSON.stringify({ notes }),
+  });
+  document.getElementById("modalBackdrop").classList.remove("visible");
+  document.getElementById("resolveNotes").value = "";
+  await loadDashboard();
+};
+
+document.getElementById("loginBtn").onclick = async () => {
+  password = document.getElementById("pwd").value;
+  try {
+    await apiGet("/counselor/stats");
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("main").classList.add("visible");
+    loadDashboard();
+    setInterval(loadDashboard, 15000);
+  } catch (e) { /* shown by apiGet */ }
+};
+
+document.getElementById("pwd").addEventListener("keypress", e => {
+  if (e.key === "Enter") document.getElementById("loginBtn").click();
+});
+</script>
+</body>
+</html>

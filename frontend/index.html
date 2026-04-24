@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mbwira — Ubuzima bwawe, ibanga ryawe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,700;1,9..144,400&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --clay: #C35A4E;
+    --clay-dark: #9E3F36;
+    --forest: #2D3D2E;
+    --forest-dark: #1C271D;
+    --cream: #F7F1E8;
+    --cream-warm: #EFE5D2;
+    --sand: #E8DDC8;
+    --ink: #1A1A1A;
+    --muted: #6B6258;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  h1, h2, h3, .display {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+  }
+  a { color: var(--forest); text-decoration: none; }
+
+  /* ---- texture backdrop ---- */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(195,90,78,0.08), transparent 40%),
+      radial-gradient(circle at 85% 75%, rgba(45,61,46,0.06), transparent 45%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ---- nav ---- */
+  .nav {
+    position: sticky; top: 0;
+    background: rgba(247,241,232,0.92);
+    backdrop-filter: blur(8px);
+    z-index: 50;
+    padding: 1.25rem 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid rgba(45,61,46,0.08);
+  }
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+  .logo span { color: var(--clay); }
+  .nav-links { display: flex; gap: 2rem; font-size: 0.92rem; }
+  .nav-links a:hover { color: var(--clay); }
+
+  /* ---- hero ---- */
+  .hero {
+    position: relative;
+    z-index: 1;
+    padding: 5rem 2rem 4rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+  @media (max-width: 860px) { .hero { grid-template-columns: 1fr; padding-top: 3rem; } }
+  .eyebrow {
+    display: inline-block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--clay);
+    margin-bottom: 1.25rem;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--clay);
+    border-radius: 100px;
+  }
+  .hero h1 {
+    font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--clay);
+    font-weight: 400;
+  }
+  .hero p.lead {
+    font-size: 1.15rem;
+    color: var(--muted);
+    max-width: 560px;
+    margin-bottom: 2rem;
+  }
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn {
+    display: inline-block;
+    padding: 0.95rem 1.8rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: var(--forest);
+    color: var(--cream);
+  }
+  .btn-primary:hover { background: var(--forest-dark); transform: translateY(-2px); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--forest);
+    border: 1px solid var(--forest);
+  }
+  .btn-secondary:hover { background: var(--forest); color: var(--cream); }
+
+  /* ---- phone illustration ---- */
+  .phone-wrap {
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+  .phone {
+    width: 280px;
+    height: 460px;
+    background: var(--forest-dark);
+    border-radius: 32px;
+    padding: 12px;
+    box-shadow:
+      0 30px 60px -20px rgba(28,39,29,0.4),
+      0 0 0 1px rgba(0,0,0,0.1);
+    position: relative;
+    transform: rotate(-3deg);
+    animation: float 6s ease-in-out infinite;
+  }
+  @keyframes float { 50% { transform: rotate(-3deg) translateY(-12px); } }
+  .phone-screen {
+    width: 100%; height: 100%;
+    background: var(--cream);
+    border-radius: 22px;
+    padding: 2rem 1.5rem;
+    font-family: 'Manrope', monospace;
+    font-size: 0.95rem;
+    color: var(--forest-dark);
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-screen .msg-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .phone-screen .msg-content {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem;
+    line-height: 1.4;
+  }
+  .phone-screen .msg-content strong { color: var(--clay); }
+  .phone-notch {
+    position: absolute;
+    top: 12px; left: 50%;
+    transform: translateX(-50%);
+    width: 100px; height: 18px;
+    background: var(--forest-dark);
+    border-radius: 0 0 12px 12px;
+  }
+
+  /* ---- sections ---- */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 5rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .section-eyebrow {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    margin-bottom: 3rem;
+    max-width: 700px;
+  }
+
+  /* ---- three channels ---- */
+  .channels {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--forest);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 2rem;
+  }
+  @media (max-width: 760px) { .channels { grid-template-columns: 1fr; } }
+  .channel {
+    background: var(--cream);
+    padding: 2.5rem 2rem;
+    transition: background 0.2s;
+  }
+  .channel:hover { background: var(--cream-warm); }
+  .channel-num {
+    font-family: 'Fraunces', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    color: var(--clay);
+    line-height: 1;
+  }
+  .channel-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    margin: 0.5rem 0 1rem;
+    font-weight: 500;
+  }
+  .channel-desc { color: var(--muted); font-size: 0.95rem; }
+  .channel-code {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--forest);
+    color: var(--cream);
+    font-family: monospace;
+    font-size: 1.05rem;
+    letter-spacing: 0.05em;
+    border-radius: 2px;
+  }
+
+  /* ---- topics ---- */
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  .topic {
+    padding: 1.5rem;
+    border: 1px solid rgba(45,61,46,0.15);
+    border-radius: 4px;
+    background: var(--cream-warm);
+  }
+  .topic h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.4rem;
+    color: var(--forest);
+  }
+  .topic p { font-size: 0.88rem; color: var(--muted); }
+
+  /* ---- promise band ---- */
+  .promise {
+    background: var(--forest);
+    color: var(--cream);
+    padding: 5rem 2rem;
+    margin-top: 3rem;
+    position: relative;
+    z-index: 1;
+  }
+  .promise-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .promise h2 {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    margin-bottom: 2rem;
+    color: var(--cream);
+  }
+  .promise h2 em { color: var(--clay); font-style: italic; font-weight: 400; }
+  .promise-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+    margin-top: 3rem;
+    text-align: left;
+  }
+  @media (max-width: 760px) { .promise-grid { grid-template-columns: 1fr; } }
+  .promise-item h3 { font-size: 1.1rem; margin-bottom: 0.6rem; color: var(--clay); }
+  .promise-item p { color: rgba(247,241,232,0.75); font-size: 0.95rem; }
+
+  /* ---- emergency card ---- */
+  .emergency {
+    background: var(--clay);
+    color: var(--cream);
+    padding: 2.5rem 2rem;
+    border-radius: 6px;
+    margin: 3rem auto 0;
+    max-width: 800px;
+    text-align: center;
+  }
+  .emergency h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+  .hotlines {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  .hotline { font-family: monospace; font-size: 1.05rem; }
+  .hotline b { display: block; font-size: 1.8rem; font-family: 'Fraunces', serif; }
+
+  /* ---- footer ---- */
+  footer {
+    position: relative;
+    z-index: 1;
+    padding: 3rem 2rem 2rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-top: 1px solid rgba(45,61,46,0.1);
+    margin-top: 4rem;
+  }
+  footer .partners {
+    margin-bottom: 1.5rem;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--forest);
+  }
+
+  /* ---- reveal animations ---- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    animation: reveal 0.8s ease forwards;
+  }
+  .reveal.d1 { animation-delay: 0.1s; }
+  .reveal.d2 { animation-delay: 0.25s; }
+  .reveal.d3 { animation-delay: 0.4s; }
+  @keyframes reveal { to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="logo">mb<span>wira</span>.</div>
+  <div class="nav-links">
+    <a href="#channels">Inzira</a>
+    <a href="#topics">Ibiganiro</a>
+    <a href="/chat-ui">Ngwura</a>
+    <a href="/ussd-sim">Igerageza USSD</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div>
+    <div class="eyebrow reveal">Ibanga · Ku buntu · Mu kinyarwanda</div>
+    <h1 class="reveal d1">Ubuzima bwawe,<br><em>ibanga ryawe.</em></h1>
+    <p class="lead reveal d2">
+      Mbwira ni umufasha wawe mu by'ubuzima bw'imyororokere n'ubuzima bwo mu mutwe.
+      Kuri telefone iyo ariyo yose, mu Kinyarwanda, amasaha 24 ku munsi.
+    </p>
+    <div class="hero-actions reveal d3">
+      <a href="/chat-ui" class="btn btn-primary">Tangira ubwire</a>
+      <a href="/ussd-sim" class="btn btn-secondary">Gerageza *384*69699#</a>
+    </div>
+  </div>
+  <div class="phone-wrap reveal d2">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="msg-label">USSD · *384*69699#</div>
+        <div class="msg-content">
+          Murakaza neza kuri <strong>Mbwira</strong>.<br><br>
+          1. Ubuzima bw'imyororokere<br>
+          2. Ubuzima bwo mu mutwe<br>
+          3. Vugana n'umujyanama<br>
+          4. Ihutirwa
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="channels">
+  <div class="section-eyebrow">Inzira eshatu · Three ways to reach us</div>
+  <h2 class="section-title">Uko urikunda kuvuga, twumva.</h2>
+  <div class="channels">
+    <div class="channel">
+      <div class="channel-num">01</div>
+      <div class="channel-title">USSD</div>
+      <p class="channel-desc">Ku telefone iyo ariyo yose. Nta internet. Ku buntu.</p>
+      <div class="channel-code">*384*69699#</div>
+    </div>
+    <div class="channel">
+      <div class="channel-num">02</div>
+      <div class="channel-title">WhatsApp</div>
+      <p class="channel-desc">Ikiganiro cyuzuye mu Kinyarwanda, WhatsApp.</p>
+      <div class="channel-code">+250 788 000 000</div>
+    </div>
+    <div class="channel">
+      <div class="channel-num">03</div>
+      <div class="channel-title">Web</div>
+      <p class="channel-desc">Mu rubuga rwa Mbwira, ufungura aho ariho hose.</p>
+      <div class="channel-code">mbwira.rw</div>
+    </div>
+  </div>
+</section>
+
+<section id="topics">
+  <div class="section-eyebrow">Ibyo dushobora kuganira · What we help with</div>
+  <h2 class="section-title">Ibibazo by'ubuzima bikunda kubaho ku rubyiruko.</h2>
+  <div class="topics-grid">
+    <div class="topic"><h3>Kuboneza urubyaro</h3><p>Kondomu, ibinini, sindano, IUD — ahoboneka ku buntu.</p></div>
+    <div class="topic"><h3>Gutwita</h3><p>Niba ushidikanya, utuje — reka tukubwire icyo gukora.</p></div>
+    <div class="topic"><h3>SIDA n'indwara</h3><p>Ipimishe ku buntu. Imiti iraboneka.</p></div>
+    <div class="topic"><h3>Imihango</h3><p>Ibisanzwe, ibyitabwaho, n'igihe cyo kujya ku muganga.</p></div>
+    <div class="topic"><h3>Kwemeranya</h3><p>Uko ubyumva, n'uko wigira hafi niba hari ubutegetsi.</p></div>
+    <div class="topic"><h3>Guhangayika</h3><p>Ntabwo uri wenyine. Tekinike zifasha.</p></div>
+    <div class="topic"><h3>Agahinda</h3><p>Niba ukomeje kumva nabi — iki ni ikibazo gikemuka.</p></div>
+    <div class="topic"><h3>Umuryango</h3><p>Iyo ibibazo byo mu rugo biguhangayikishije.</p></div>
+  </div>
+</section>
+
+<section class="promise">
+  <div class="promise-inner">
+    <div class="section-eyebrow" style="color: var(--clay);">Isezerano ryacu · Our promise</div>
+    <h2>Ibanga ryawe<br><em>nta kintu tugutanga.</em></h2>
+    <div class="promise-grid">
+      <div class="promise-item">
+        <h3>Ibanga rwose</h3>
+        <p>Ntabwo dusaba izina ryawe, ngo dukoreshe nimero yawe cyangwa dukurikirane amakuru yawe.</p>
+      </div>
+      <div class="promise-item">
+        <h3>Ku buntu</h3>
+        <p>Nta kintu kibanza. USSD ikora ku telefone yose. Ubufasha bw'umujyanama buratangwa ku buntu.</p>
+      </div>
+      <div class="promise-item">
+        <h3>Umujyanama ufite uburenganzira</h3>
+        <p>Iyo ukeneye umuntu, uhuza n'umuganga w'ubuzima bwo mu mutwe wemewe cyangwa umujyanama wa CHW.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="emergency">
+    <h3>Niba uri mu kaga nonaha</h3>
+    <div class="hotlines">
+      <div class="hotline"><b>112</b>Polisi</div>
+      <div class="hotline"><b>114</b>Ubuzima</div>
+      <div class="hotline"><b>3029</b>Isange OSC</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="partners">Mu bufatanye na Imbuto Foundation · MINIYOUTH · UNFPA</div>
+  <div>Mbwira · MVP 2026 · Ubuzima bw'urubyiruko</div>
+</footer>
+
+</body>
+</html>

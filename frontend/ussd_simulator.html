@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mbwira USSD Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Manrope:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --clay: #C35A4E; --forest: #2D3D2E; --forest-dark: #1C271D;
+    --cream: #F7F1E8; --cream-warm: #EFE5D2; --ink: #1A1A1A; --muted: #6B6258;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: linear-gradient(180deg, #1a1a1a 0%, #2a2a2a 100%);
+    min-height: 100vh;
+    color: var(--cream);
+    display: flex; flex-direction: column;
+    padding: 2rem 1rem;
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 2rem;
+    max-width: 500px;
+    margin-left: auto; margin-right: auto;
+  }
+  .header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  .header p { color: rgba(247,241,232,0.6); font-size: 0.9rem; }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    max-width: 900px;
+    margin: 0 auto;
+    align-items: start;
+  }
+  @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+
+  /* --- phone --- */
+  .phone-frame {
+    background: #0f0f0f;
+    border-radius: 36px;
+    padding: 20px;
+    box-shadow:
+      0 0 0 2px #333,
+      0 40px 80px -30px rgba(0,0,0,0.8),
+      inset 0 0 30px rgba(0,0,0,0.5);
+    width: 320px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .phone-speaker {
+    width: 60px; height: 6px;
+    background: #333; border-radius: 3px;
+    margin: 0 auto 16px;
+  }
+  .phone-screen {
+    background: #C5D68E;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.03),
+        rgba(0,0,0,0.03) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+    border-radius: 4px;
+    padding: 1.2rem 1rem;
+    min-height: 320px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: #1a2a0a;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    position: relative;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .phone-screen .status {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed rgba(0,0,0,0.3);
+    opacity: 0.7;
+  }
+  .phone-screen .content {
+    font-size: 0.82rem;
+  }
+  .phone-screen .input-area {
+    position: absolute;
+    bottom: 0.8rem; left: 1rem; right: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed rgba(0,0,0,0.3);
+    display: flex; justify-content: space-between;
+    font-size: 0.7rem;
+    opacity: 0.6;
+  }
+
+  .keypad {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .key {
+    aspect-ratio: 1.5 / 1;
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    color: var(--cream);
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 0 #000;
+  }
+  .key:active {
+    transform: translateY(2px);
+    box-shadow: 0 0 0 #000;
+  }
+  .key.send {
+    background: var(--forest);
+    grid-column: 1; grid-row: 5;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+  .key.clear {
+    background: var(--clay);
+    grid-column: 3; grid-row: 5;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+  .key.hash, .key.star { font-family: monospace; font-size: 2rem; }
+
+  /* --- side panel --- */
+  .side {
+    padding: 1rem;
+  }
+  .side h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: var(--cream);
+  }
+  .side p { color: rgba(247,241,232,0.7); margin-bottom: 1.5rem; line-height: 1.6; font-size: 0.92rem; }
+  .quick-dial {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  .quick-dial strong {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--clay);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  .quick-dial p { margin: 0; font-size: 0.85rem; color: rgba(247,241,232,0.6); }
+  .log {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: rgba(247,241,232,0.4);
+    padding: 1rem;
+    background: rgba(0,0,0,0.3);
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 1rem;
+  }
+  .log div { margin-bottom: 0.3rem; }
+  .log .req { color: #8bbbe8; }
+  .log .res { color: #c5d68e; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>USSD Simulator</h1>
+  <p>Igerageza Mbwira nk'aho uri kuri telefone ya feature phone.<br>
+  Simulate Mbwira as if dialing from any basic phone.</p>
+</div>
+
+<div class="layout">
+  <div>
+    <div class="phone-frame">
+      <div class="phone-speaker"></div>
+      <div class="phone-screen" id="screen">
+        <div class="status"><span>MTN RW</span><span>📶 🔋</span></div>
+        <div class="content" id="screenContent">Press *384*69699# SEND to start</div>
+        <div class="input-area"><span id="inputDisplay">_</span><span>OPTIONS</span></div>
+      </div>
+      <div class="keypad">
+        <button class="key" data-k="1">1</button>
+        <button class="key" data-k="2">2</button>
+        <button class="key" data-k="3">3</button>
+        <button class="key" data-k="4">4</button>
+        <button class="key" data-k="5">5</button>
+        <button class="key" data-k="6">6</button>
+        <button class="key" data-k="7">7</button>
+        <button class="key" data-k="8">8</button>
+        <button class="key" data-k="9">9</button>
+        <button class="key star" data-k="*">*</button>
+        <button class="key" data-k="0">0</button>
+        <button class="key hash" data-k="#">#</button>
+        <button class="key send" id="sendBtn">SEND</button>
+        <button class="key" data-k="7">7</button>
+        <button class="key clear" id="clearBtn">CLR</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="side">
+    <h2>Try these inputs</h2>
+    <p>Dial <code>*384*69699#</code> to start, then use the menus. Every screen is real — it POSTs to the same endpoint Africa's Talking will call in production.</p>
+
+    <div class="quick-dial" onclick="quickDial('*384*69699#')">
+      <strong>*384*69699#</strong>
+      <p>Open main menu</p>
+    </div>
+    <div class="quick-dial" onclick="quickDial('*384*69699#', ['2','5'])">
+      <strong>Menu → 2 → 5</strong>
+      <p>Mental health → self-harm thoughts (triggers escalation)</p>
+    </div>
+    <div class="quick-dial" onclick="quickDial('*384*69699#', ['1','1'])">
+      <strong>Menu → 1 → 1</strong>
+      <p>SRH → contraception info</p>
+    </div>
+    <div class="quick-dial" onclick="quickDial('*384*69699#', ['3'])">
+      <strong>Menu → 3</strong>
+      <p>Request a counselor callback</p>
+    </div>
+
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<script>
+let dialBuffer = "";
+let sessionId = "sim_" + Math.random().toString(36).slice(2, 10);
+let accumulatedInput = "";
+let inSession = false;
+
+const screen = document.getElementById("screenContent");
+const inputDisplay = document.getElementById("inputDisplay");
+const log = document.getElementById("log");
+
+function logLine(kind, text) {
+  const div = document.createElement("div");
+  div.className = kind;
+  div.textContent = text;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+async function callUssd() {
+  const body = new URLSearchParams();
+  body.append("sessionId", sessionId);
+  body.append("serviceCode", "*384*69699#");
+  body.append("phoneNumber", "+250788000001");
+  body.append("text", accumulatedInput);
+  logLine("req", `POST /ussd  text="${accumulatedInput}"`);
+  const res = await fetch("/ussd", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString()
+  });
+  const txt = await res.text();
+  logLine("res", txt.slice(0, 200));
+  return txt;
+}
+
+function renderScreen(text) {
+  // text starts with "CON " or "END "
+  const kind = text.slice(0, 3);
+  const body = text.slice(4);
+  screen.textContent = body;
+  if (kind === "END") {
+    inSession = false;
+    setTimeout(() => {
+      screen.textContent = "Call ended.\nPress *384*69699# to start again.";
+      accumulatedInput = "";
+      sessionId = "sim_" + Math.random().toString(36).slice(2, 10);
+    }, 3500);
+  }
+}
+
+async function onSend() {
+  if (!inSession) {
+    // starting: dialBuffer should equal *384*69699#
+    if (dialBuffer.includes("*384*69699#") || dialBuffer === "*384*69699#") {
+      inSession = true;
+      dialBuffer = "";
+      inputDisplay.textContent = "_";
+      accumulatedInput = "";
+      const res = await callUssd();
+      renderScreen(res);
+    } else {
+      screen.textContent = "Dial *384*69699# to start.";
+      dialBuffer = "";
+      inputDisplay.textContent = "_";
+    }
+  } else {
+    // in session: dialBuffer is the next input
+    accumulatedInput = accumulatedInput
+      ? accumulatedInput + "*" + dialBuffer
+      : dialBuffer;
+    dialBuffer = "";
+    inputDisplay.textContent = "_";
+    const res = await callUssd();
+    renderScreen(res);
+  }
+}
+
+document.querySelectorAll("[data-k]").forEach(b => {
+  b.addEventListener("click", () => {
+    dialBuffer += b.dataset.k;
+    inputDisplay.textContent = dialBuffer || "_";
+  });
+});
+
+document.getElementById("sendBtn").addEventListener("click", onSend);
+document.getElementById("clearBtn").addEventListener("click", () => {
+  dialBuffer = "";
+  inputDisplay.textContent = "_";
+});
+
+async function quickDial(code, followups = []) {
+  // Reset
+  dialBuffer = code;
+  inputDisplay.textContent = code;
+  inSession = false;
+  sessionId = "sim_" + Math.random().toString(36).slice(2, 10);
+  accumulatedInput = "";
+  await onSend();
+  for (const f of followups) {
+    await new Promise(r => setTimeout(r, 900));
+    dialBuffer = f;
+    inputDisplay.textContent = f;
+    await onSend();
+  }
+}
+</script>
+</body>
+</html>
