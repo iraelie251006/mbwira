@@ -126,5 +126,5 @@ See [docs/SETUP.md](docs/SETUP.md) for the checklist.
 
 ## License & Contact
 
-Built by [Your Name] for the iAccelerator 2026 competition.
+Built by Niyubwayo Irakoze Elie & Ikuzwe Jean Lewis for the iAccelerator 2026 competition.
 All content drafts require clinical review before live deployment.
