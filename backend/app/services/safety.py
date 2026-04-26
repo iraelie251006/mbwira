@@ -29,7 +29,7 @@ GBV_KEYWORDS_EN = [
     "beat me", "sexually assaulted", "touched me without",
 ]
 GBV_KEYWORDS_RW = [
-    "yanfashe ku ngufu", "yamfashe ku ngufu", "gufata ku ngufu",
+    "yapfashe ku ngufu", "yamfashe ku ngufu", "gufata ku ngufu",
     "ihohoterwa", "yankubise", "yankoreye nabi",
 ]
 
