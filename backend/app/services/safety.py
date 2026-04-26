@@ -44,8 +44,8 @@ MEDICAL_EMERGENCY_RW = [
 ]
 
 CHILD_SAFEGUARDING_PATTERNS = [
-    r"\bi(?:\s|')m\s+1[0-7]\b",  # "I'm 15", "I am 17"
-    r"\bndi\s+w'?imyaka\s+1[0-7]\b",  # Kinyarwanda rough form
+    r"\bi(?:\s|')m\s+1[0-7]\b",
+    r"\bndi\s+w'?imyaka\s+1[0-7]\b",
 ]
 
 
